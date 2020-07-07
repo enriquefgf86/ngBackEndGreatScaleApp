@@ -1,0 +1,16 @@
+{
+  "name": "ngbackendgreatscaleproject",
+  "version": "1.0.0",
+  "description": "Server Backend of app ngGreatScaleProject ",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "CubanCoder",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.17.1",
+    "mongoose": "^5.9.22"
+  }
+}
