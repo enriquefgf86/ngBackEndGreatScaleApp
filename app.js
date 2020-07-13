@@ -25,8 +25,13 @@ app.use(bodyParser.json())
 // importando la ruta creada asignadosele a una variable 
 // ==================================================================
 var loginRoutes=require('./routes/login')
-var appRoutes=require('./routes/app');
+var appRoutes=require('./routes/app')
 var userRoutes=require('./routes/user')
+var hospitalRoutes=require('./routes/hospital')
+var doctorRoutes=require('./routes/doctor')
+var generalSearchRoutes=require('./routes/generalSearch')
+var uploadRoutes=require('./routes/uploads')
+var downloadRoutes=require('./routes/downloads')
 //=======================================================================
 //conectando a la base de datos
 //=======================================================================
@@ -41,6 +46,16 @@ console.log("mongo database running:\x1b[32m%s\x1b[0m","online");
 app.use('/user',userRoutes);
 
 app.use('/login',loginRoutes);
+
+app.use('/hospital',hospitalRoutes);
+
+app.use('/doctor',doctorRoutes);
+
+app.use('/search',generalSearchRoutes);
+
+app.use('/uploads',uploadRoutes);
+
+app.use('/download',downloadRoutes);
 
 app.use('/',appRoutes),//vease que en este caso se hace referencia a la importada desde el modulo routes
                       //haciendo referencia en este casoa la variable a la cual  le fue asifnada

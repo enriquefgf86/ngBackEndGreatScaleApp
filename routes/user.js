@@ -19,34 +19,45 @@ var app = express();
 var User = require("../models/user");
 var jsonWebToken = require("jsonwebtoken");
 var SEED = require("../config/config").SEED;
-var middleware=require('../middleware/authentication.js').verifyToken
+var middleware = require("../middleware/authentication.js").verifyToken;
 
 // ===========================================================================
 // Estableciendo la ruta para obtener la data de esta ruta obteniendo
 //todos los usuarios
 // ===========================================================================
 app.get("/", (request, response, next) => {
-  User.find({}, "name email role img").exec((error, users) => {
-    if (error) {
-      return response.status(500).json({
-        ok: false,
-        message: "Error in Database",
-        errorType: error,
-      });
-    }
+  var from = request.query.from || 0;
+  from = Number(from); //paginando desde que numero se debe empezar a contar cuando se haga el request,
+  //o sea trayendo los nuemros desde (from)el ultimo listado en el primer request
+  //otro grupo (limit), y asi sucesivamente
 
-    response.status(200).json({
-      ok: true,
-      message: "users",
-      usersCollection: users,
+  User.find({}, "name email role img")
+    .skip(from)
+    .limit(4)
+    .exec((error, users) => {
+      if (error) {
+        return response.status(500).json({
+          ok: false,
+          message: "Error in Database",
+          errorType: error,
+        });
+      }
+      User.count({}, (error, counting) => {
+        response.status(200).json({
+          ok: true,
+          message: "users",
+          usersCollection: users,
+          userTotalCount:counting,
+        });
+      });
+      
     });
-  });
 });
 
-
+//==========================================================================
 // Estableciendo la ruta para crear usuario
 // ===========================================================================
-app.post("/",middleware, (request, response, next) => {
+app.post("/", middleware, (request, response, next) => {
   var body = request.body;
 
   var user = new User({
@@ -71,7 +82,7 @@ app.post("/",middleware, (request, response, next) => {
       ok: true,
       message: "User created",
       usersCollection: userSaved,
-      userToken:request.user
+      userToken: request.user,
     });
   });
 });
@@ -79,7 +90,7 @@ app.post("/",middleware, (request, response, next) => {
 // ===========================================================================
 // Estableciendo la ruta para modificar o actualizar usuario
 // ===========================================================================
-app.put("/:id",middleware, (request, response, next) => {
+app.put("/:id", middleware, (request, response, next) => {
   var id = request.params.id;
 
   var bodyUser = request.body;
@@ -122,7 +133,7 @@ app.put("/:id",middleware, (request, response, next) => {
 // ===============================================================================
 // estableciendo la ruta para eliminar un usuario
 // ===============================================================================
-app.delete("/:idToDelete",middleware, (request, response, next) => {
+app.delete("/:idToDelete", middleware, (request, response, next) => {
   var id = request.params.idToDelete;
 
   User.findByIdAndRemove(id, (error, userDeleted) => {

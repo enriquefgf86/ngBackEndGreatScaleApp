@@ -14,14 +14,28 @@ var express = require("express");
 //inicializando variables express
 //========================================================================
 var app = express();
+
+const path=require("path");
+const fileSystem=require("fs")
 // ===========================================================================
 // Estableciendo la ruta principal
 // ===========================================================================
-app.get("/", (request, response, next) => {
-  response.status(200).json({
-    ok: true,
-    message: "request correct",
-  });
+app.get("/:collectionType/:imageName", (request, response, next) => {
+
+    var imgName=request.params.imageName;
+    var type=request.params.collectionType;
+
+    var pathImg=path.resolve(__dirname,`../uploadFiles/${type}/${imgName}`)//estableciendose el path para encontrar la imagen
+
+     if(fileSystem.existsSync(pathImg)){
+         response.sendFile(pathImg)
+     }
+     else{
+        var pathNotFoundImage=path.resolve(__dirname,'../assets/no-img.jpg');
+        response.sendFile(pathNotFoundImage)
+     }
+
+  
 });
 // ===================================================================================
 // Exportando la ruta o modulo para su uso en la aplicacion
