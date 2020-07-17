@@ -40,6 +40,8 @@ app.use(bodyParser.urlencoded({ extended: false }));
 // parse application/json
 app.use(bodyParser.json());
 
+app.use(express.json());
+
 //==================================================================
 //Configurando la ruta del cors a traves del use de app
 //========================================================================
@@ -70,19 +72,20 @@ var downloadRoutes = require("./routes/downloads");
 //=========================================================================
 //estableciendo las rutas importadas desde los modulos
 //========================================================================
-app.use("/user", userRoutes);
+app.use("/user",require('./routes/user') );
+app.use("/login",require('./routes/login'));
 
-app.use("/login", loginRoutes);
+// app.use("/login", loginRoutes);
 
-app.use("/hospital", hospitalRoutes);
+// app.use("/hospital", hospitalRoutes);
 
-app.use("/doctor", doctorRoutes);
+// app.use("/doctor", doctorRoutes);
 
-app.use("/search", generalSearchRoutes);
+// app.use("/search", generalSearchRoutes);
 
-app.use("/uploads", uploadRoutes);
+// app.use("/uploads", uploadRoutes);
 
-app.use("/download", downloadRoutes);
+// app.use("/download", downloadRoutes);
 
 app.use("/", appRoutes), //vease que en este caso se hace referencia a la importada desde el modulo routes
   //haciendo referencia en este casoa la variable a la cual  le fue asifnada

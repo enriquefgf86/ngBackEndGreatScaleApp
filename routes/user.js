@@ -9,157 +9,161 @@
 // Al igual que en el root app es necesario importar express node para establecer
 // la fucnionalidad del backend de node
 // =======================================================================
-var express = require("express");
-var cryptoPaswword = require("bcryptjs");
+const { Router } = require("express"); //importando express asignandosleea una variable constante llamada Router
+//vease que la variable se encierra en parentesis a manera de desagregacion
+//en caso de que a futuro se pretendan insertar nuevas constantes en la misma
+//linea
+
+const { getAllUsers } = require("../controllers/users"); //importando del controlador de usuarios todo lo referente a la ruta
+//o cada una de lloas rutas del controller para usario
+
+const { createAUser } = require("../controllers/users"); //importando del controlador de usuarios todo lo referente a la ruta
+//o cada una de lloas rutas del controller para usario
+
+const { updateUser } = require("../controllers/users"); //importando del controlador de usuarios todo lo referente a la ruta
+//o cada una de lloas rutas del controller para usario en este caso la ruta de actualizar usuario
+
+const { deleteUser } = require("../controllers/users"); //importando del controlador de usuarios todo lo referente a la ruta
+//o cada una de lloas rutas del controller para usario en este caso la ruta de borrar  usuario
+
+const { check } = require("express-validator"); //importando el middleware check del paquete de express-validator
+//muy util para validar campos y demas en el back
+
+const { fieldValidator } = require("../middleware/validationFields"); //importando field validation funcion del midelware creado
+//validationField , el mismo se utiliza para ya de antemano tener generadas
+//respuestas , lo cual haria menos trabajoso escribir el codigo , pues en la logica
+//se escribe simplemente una vez( en la carpeta middle ware en este caso ) y ya
+//despues se procederia a importarlo en dondequieres aque se use
+
 //=======================================================================
 //inicializando variables express
 //========================================================================
-var app = express();
+const router = Router(); //inicializando la constante Router previamente requerida en este apartado
+//de rutas a traves de express
 
 var User = require("../models/user");
-var jsonWebToken = require("jsonwebtoken");
-var SEED = require("../config/config").SEED;
-var middleware = require("../middleware/authentication.js").verifyToken;
+// var jsonWebToken = require("jsonwebtoken");
+const { validateJwt } = require("../middleware/jwtMiddleware");
+// var SEED = require("../config/config").SEED;
+// var middleware = require("../middleware/authentication.js").verifyToken;
 
 // ===========================================================================
 // Estableciendo la ruta para obtener la data de esta ruta obteniendo
 //todos los usuarios
 // ===========================================================================
-app.get("/", (request, response, next) => {
-  var from = request.query.from || 0;
-  from = Number(from); //paginando desde que numero se debe empezar a contar cuando se haga el request,
-  //o sea trayendo los nuemros desde (from)el ultimo listado en el primer request
-  //otro grupo (limit), y asi sucesivamente
+router.get("/",validateJwt, getAllUsers); //Obtener todos los usuarios
 
-  User.find({}, "name email role img")
-    .skip(from)
-    .limit(4)
-    .exec((error, users) => {
-      if (error) {
-        return response.status(500).json({
-          ok: false,
-          message: "Error in Database",
-          errorType: error,
-        });
-      }
-      User.count({}, (error, counting) => {
-        response.status(200).json({
-          ok: true,
-          message: "users",
-          usersCollection: users,
-          userTotalCount:counting,
-        });
-      });
-      
-    });
-});
+// ===========================================================================
+// Estableciendo la ruta para crear un usuario
+// ===========================================================================
+router.post(
+  "/",
+  [
+    check("email", "email is obligatory").isEmail(),
+    check("name", "name is obligatory").not().isEmpty(),
+    check("password", "password is obligatory").not().isEmpty(),
+    check("role", "role is obligatory").not().isEmpty(),
+
+    fieldValidator, //grabando o constatatando no exite ningun error en validacion
+    //vease que se debe poner despues de los middle ware de check
+  ],
+  createAUser
+); //Crear un usuario
 
 //==========================================================================
-// Estableciendo la ruta para crear usuario
+// Estableciendo la ruta para modificar usuario
 // ===========================================================================
-app.post("/", middleware, (request, response, next) => {
-  var body = request.body;
+router.put(
+  "/:id",validateJwt,
+  [
+    check("email", "email is obligatory").isEmail(),
+    check("name", "name is obligatory").not().isEmpty(),
+    check("role", "role is obligatory").not().isEmpty(),
 
-  var user = new User({
-    name: body.name,
-    email: body.email,
-    password: cryptoPaswword.hashSync(body.password, 10),
-    img: body.img,
-    role: body.role,
-  });
+    fieldValidator, //grabando o constatatando no exite ningun error en validacion
+    //vease que se debe poner despues de los middle ware de check
+  ],
+  updateUser
+); //Obtener todos los usuarios
 
-  user.save((error, userSaved) => {
-    if (error) {
-      return response.status(400).json({
-        ok: false,
-        message: "Error  creating user in Database",
-        errorType: error,
-      });
-    }
-    userSaved.password = ":)";
-
-    response.status(201).json({
-      ok: true,
-      message: "User created",
-      usersCollection: userSaved,
-      userToken: request.user,
-    });
-  });
-});
-
+//==========================================================================
+// Estableciendo la ruta para borrar usuario
 // ===========================================================================
-// Estableciendo la ruta para modificar o actualizar usuario
-// ===========================================================================
-app.put("/:id", middleware, (request, response, next) => {
-  var id = request.params.id;
+router.delete("/:id",validateJwt, deleteUser);
 
-  var bodyUser = request.body;
+// // ===========================================================================
+// // Estableciendo la ruta para modificar o actualizar usuario
+// // ===========================================================================
+// router.put("/:id", middleware, (request, response, next) => {
+//   var id = request.params.id;
 
-  User.findById(id, (error, userFound) => {
-    if (error) {
-      return response.status(500).json({
-        ok: false,
-        message: "Error  in database",
-        errorType: error,
-      });
-    }
-    if (!userFound) {
-      return response.status(404).json({
-        ok: false,
-        message: "Error  User with id" + id + " not found",
-        errorType: error,
-      });
-    }
-    userFound.name = bodyUser.name;
-    userFound.email = bodyUser.email;
-    userFound.role = bodyUser.role;
+//   var bodyUser = request.body;
 
-    userFound.save((error, userSaved) => {
-      if (error) {
-        return response.status(400).json({
-          ok: false,
-          message: "Error  updating user in Database",
-          errorType: error,
-        });
-      }
-      response.status(201).json({
-        ok: true,
-        message: "User updated",
-        usersCollection: userSaved,
-      });
-    });
-  });
-});
-// ===============================================================================
-// estableciendo la ruta para eliminar un usuario
-// ===============================================================================
-app.delete("/:idToDelete", middleware, (request, response, next) => {
-  var id = request.params.idToDelete;
+//   User.findById(id, (error, userFound) => {
+//     if (error) {
+//       return response.status(500).json({
+//         ok: false,
+//         message: "Error  in database",
+//         errorType: error,
+//       });
+//     }
+//     if (!userFound) {
+//       return response.status(404).json({
+//         ok: false,
+//         message: "Error  User with id" + id + " not found",
+//         errorType: error,
+//       });
+//     }
+//     userFound.name = bodyUser.name;
+//     userFound.email = bodyUser.email;
+//     userFound.role = bodyUser.role;
 
-  User.findByIdAndRemove(id, (error, userDeleted) => {
-    if (error) {
-      return response.status(500).json({
-        ok: false,
-        message: "Error  deleting  user in Database",
-        errorType: error,
-      });
-    }
+//     userFound.save((error, userSaved) => {
+//       if (error) {
+//         return response.status(400).json({
+//           ok: false,
+//           message: "Error  updating user in Database",
+//           errorType: error,
+//         });
+//       }
+//       response.status(201).json({
+//         ok: true,
+//         message: "User updated",
+//         usersCollection: userSaved,
+//       });
+//     });
+//   });
+// });
+// // ===============================================================================
+// // estableciendo la ruta para eliminar un usuario
+// // ===============================================================================
+// router.delete("/:idToDelete", middleware, (request, response, next) => {
+//   var id = request.params.idToDelete;
 
-    if (!userDeleted) {
-      return response.status(400).json({
-        ok: false,
-        message: "Error  not found user in database with that id",
-        errorType: { error: "Error  not found user in database with that id" },
-      });
-    }
-    response.status(200).json({
-      ok: true,
-      message: "User deleted",
-      usersCollection: userDeleted,
-    });
-  });
-});
-// ===================================================================================
-// Exportando la ruta o modulo para su uso en la aplicacion
-// ==================================================================================
-module.exports = app;
+//   User.findByIdAndRemove(id, (error, userDeleted) => {
+//     if (error) {
+//       return response.status(500).json({
+//         ok: false,
+//         message: "Error  deleting  user in Database",
+//         errorType: error,
+//       });
+//     }
+
+//     if (!userDeleted) {
+//       return response.status(400).json({
+//         ok: false,
+//         message: "Error  not found user in database with that id",
+//         errorType: { error: "Error  not found user in database with that id" },
+//       });
+//     }
+//     response.status(200).json({
+//       ok: true,
+//       message: "User deleted",
+//       usersCollection: userDeleted,
+//     });
+//   });
+// });
+// // ===================================================================================
+// // Exportando la ruta o modulo para su uso en la aplicacion
+// // ==================================================================================
+module.exports = router;

@@ -4,7 +4,7 @@ var SEED = require("../config/config").SEED;
 // =========================================================================
 // Middleware para tratar con los usuarios y sus tokens mediante verificacion
 // =========================================================================
-exports.verifyToken = function (request, response, next) {
+exports.verifyToken = function (request, response=response, next) {
   var token = request.query.token;
   jsonWebToken.verify(token, SEED, (error, decoded) => {
     if (error) {
