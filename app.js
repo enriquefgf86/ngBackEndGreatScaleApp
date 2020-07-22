@@ -31,11 +31,6 @@ var bodyParser = require("body-parser");//inicializando la variable body parser 
 //========================================================================
 const app = express(); //inicializando aplicacion de express la mas importante y necesaria para el arrancado de la dependencia
 
-//=======================================================================
-//conectando a la base de datos con ayuda de mongoose
-//=======================================================================
-connection(); //Para ello se utiliza la variable previamente importada de archivo config(connection)
-//y se inicializa en este apartado
 
 //============================================================================
 //Body parser para tratar automaticamente elementos json y codificados
@@ -53,11 +48,26 @@ app.use(express.json());
 //Configurando la ruta del cors a traves del use de app
 //========================================================================
 app.use(cors());
+//=======================================================================
+//conectando a la base de datos con ayuda de mongoose
+//=======================================================================
+connection(); //Para ello se utiliza la variable previamente importada de archivo config(connection)
+//y se inicializa en este apartado
 
-//============================================================================
-//Rutas de app raiz:aqui se establece la ruta del app raiz('/') de ella entonces
-//se originarian la demas 
-//============================================================================
+ //======================================================================
+  //public dir  that everybody can use the content of this 
+  //=======================================================================
+  app.use(express.static('public'))
+//Se indica con esta fucnion que cualquier usuario accediendo a la aplicacion 
+//podria acceder a este archivo en especifico(que en este caso esta disenado para el acceso 
+//a la aplicacion mediante google signin)
+
+
+
+// //============================================================================
+// //Rutas de app raiz:aqui se establece la ruta del app raiz('/') de ella entonces
+// //se originarian la demas 
+// //============================================================================
 app.get("/", (request, response, next) => {
   response.status(200).json({
     ok: true,
@@ -72,6 +82,7 @@ app.get("/", (request, response, next) => {
 //funcion use canalizandolas a traves de esta la dependencia principal
 //app
 //========================================================================
+
 app.use("/user",require('./routes/user') );
 app.use("/login",require('./routes/login'));
 app.use("/hospital",require('./routes/hospital'));
@@ -97,3 +108,4 @@ app.use("/upload",require('./routes/uploads'))
       "online"
     );
   });
+ 

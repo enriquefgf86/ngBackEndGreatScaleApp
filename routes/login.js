@@ -15,7 +15,7 @@
 
 const { Router } = require("express");
 const router = Router();
-const { loginUser } = require("../controllers/login");
+const { loginUser ,loginUserGoogle} = require("../controllers/login");
 const { check } = require("express-validator");
 const { fieldValidator } = require("../middleware/validationFields");
 
@@ -30,6 +30,16 @@ router.post(
   ],
   loginUser
 );
+
+
+router.post(
+  "/google",
+  [
+    check('token','Token is neccesary').not().isEmpty(),
+     fieldValidator
+  ],
+  loginUserGoogle
+);//ruta especoificada para el usuario que desee autentificarse mediante google
 //=======================================================================
 //inicializando variables express
 //========================================================================
