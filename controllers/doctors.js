@@ -8,7 +8,9 @@ const cryptoPaswword = require("bcryptjs"); //importando el encriptador de contr
 const { getJsonWebToken } = require("../helpers/jasonWebToken");
 
 const getAllDoctors = async (request, response = response, next) => {
-    const allDoctors = await Doctor.find({}, "name  img").populate("hospital","name").populate("user","name img email");
+  const allDoctors = await Doctor.find({}, "name  img")
+    .populate("hospital", "name")
+    .populate("user", "name img email");
 
   response.status(201).json({
     ok: true,
@@ -25,7 +27,7 @@ const createADoctor = async (request, response, next) => {
   const doctor = new Doctor({ user: userId, ...request.body });
 
   try {
-    const doctorDb =await  doctor.save();
+    const doctorDb = await doctor.save();
     await response.status(201).json({
       //se devuelve un esstado positivo sobre la creacion del docotor
       ok: true,
@@ -46,55 +48,49 @@ const createADoctor = async (request, response, next) => {
 //=====================================================================================
 
 const updateDoctor = async (request, response = response) => {
-  //   const userId = request.params.id; //designando el id traido por el usuario en el request de sus parametros oel URL
+  const doctorId = request.params.idDoctor; //trayendo enntoces el id del doctor a modificar en cuestion
+  //pasod mediante el requet param de la ruta del servicio que sugiere dicha actualizacion(/:idDoctor)
+
+  const userId = request.userId; //designando el id traido por el usuario en el request
+  //de sus parametros oel URL proveido por el token
 
   try {
-    //proceso de logica
+    const doctorDb = await Doctor.findById(doctorId); //estableciendo la constante que de cierta
+    //manera le seria asignada el id necesario para determinar con posterioridad si el id
+    //existente existe para ese doctor o no
 
-    // const userDb = await User.findById(userId); //asiganado a la variable userDb el oid traido por el usuario en el params
+    if (!doctorDb) {
+      return response.status(400).json({
+        ok: false,
+        msg: "doctor  doesn't exist",
+      });
+    }
 
-    // if (!userDb) {
-    //   //validacion para saber si el id del usuario solicitado existe
-    //   return response.status(400).json({
-    //     ok: false,
-    //     msg: "user doesn't exist",
-    //   });
-    // }
+    const doctorModified = await { ...request.body, user: userId }; //desagregando el body y todos los elementos
+    //que en el se traigan para modificar al doctor , para entonces una vez hecho esto proceder a la
+    //actualizacion del mismo , vease que uno de los paramtros desagregados seria el user, y se le
+    //asiganria al mismo el user correspondiente al id traido en el token despues de validar(userId)
 
-    // const { password, google, email, ...userDbFields } = request.body; //trayendo todo lo que el usuario y sus items representa en el body del request
-
-    // if (userDb.email !== email) {
-    //   //para evitar la modificacion de un correo a un correo ya existente o no actualizado
-    //   //lo cual duplicaria los keys de ahi su elimnacion del cuerpo modificado asigando a
-
-    //   const emailExisting = await User.findOne({ email }); //inicializando variable que trae el email existente en
-    //   //el esque,a del usuario, para posteriores validaciones
-
-    //   if (emailExisting) {
-    //     return response.status(400).json({
-    //       ok: false,
-    //       msg: "cant Update to this email cause already exists",
-    //     });
-    //   }
-    // }
-
-    // userDbFields.email = await email;
-
-    // // delete userDbFields.password;//borrando de los campos de actualizacion asignados a la variable userDbFields los
-    // // delete userDbFields.google;//iems password y google , pues los mismos no se necesitan actualizar en este ejercicio
-
-    // const userDbFieldsUpdated = await User.findByIdAndUpdate(
-    //   userId,
-    //   userDbFields,
-    //   { new: true }
-    // );
+    console.log(request.body);
+    const updatedDoctor = await Doctor.findByIdAndUpdate(
+      doctorId,
+      doctorModified,
+      { new: true }
+    );
+    //Esta manera manera de modificacion es un poco mas sencilla y abarcadora pues pposterior al paso
+    //anterior en donde se desagrega  el body request , y se le asigana uno de sus items(user) el
+    //id traido y validado por el token (userId), simplemente ya se acederia entocens al constructor de
+    //doctor para modifcar y a traves de la funcion findByIdAndUpdate, como bien se dice
+    //primero se pasaria el id del hospital en cuestion traido median el request params(doctorId), luego
+    //se pasarian los paremtros del update, los cuales se realizaron en el paso anterior , y por ultimo
+    //entonces se inicializaria el template new:true lo cual regresaria el ultimo documento actulaizaod
 
     await response.status(201).json({
       //se devuelve un esstado positivo sobre la modificacion del usuario del usuario
       ok: true,
       msg: "Doctor Updated",
-      //   userDbFieldsUpdated,
-    });
+      doctor: updatedDoctor,
+    }); //trayendo entonces la respuesta positiva ya con el doctor actualizado
   } catch (error) {
     console.log(error);
     response.status(500).json({
@@ -105,23 +101,27 @@ const updateDoctor = async (request, response = response) => {
 };
 
 //========================================================================================
-//borrar  el usuario
+//borrar  el doctor
 //=====================================================================================
 
 const deleteDoctor = async (request, response = response) => {
-  //   const userId = request.params.id;
+  const userId = request.userId; //trayendo a traves del token el id del usuario que acomete
+  //la eliminancion del doctor
+
+  const doctorId = request.params.idDoctor; //establecciendo en uan constante el id traiudo
+  //mediante url del doctor en cuestion a borrar
 
   try {
-    // const userDb = await User.findById(userId);
+    const doctorDb = await Doctor.findById(doctorId); //estableciendo la constante que almacenaria
+    //el objeto del doctor que se encontro segun su id dentor del back-end serve
 
-    // if (!userDb) {
-    //   // validacion para saber si el id del usuario solicitado existe
-    //   return await response.status(404).json({
-    //     ok: false,
-    //     msg: "user doesn't exist",
-    //   });
-    // }
-    // await User.findByIdAndDelete(userId);
+    if (!doctorDb) {
+      return await response.status(404).json({
+        ok: false,
+        msg: "doctor doesn't exist",
+      }); // validacion para saber si el id del doctor solicitado existe
+    }
+    await Doctor.findByIdAndDelete(doctorId);
 
     response.status(201).json({
       //se devuelve un esstado positivo sobre la modificacion del usuario del usuario

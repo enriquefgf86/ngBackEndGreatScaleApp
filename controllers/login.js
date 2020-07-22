@@ -32,7 +32,7 @@ const loginUser = async (request, response = response) => {
         msg: " password  not valid",
       });
     }
-    const token = await getJsonWebToken(userDb.id);//generando jason web token 
+    const token = await getJsonWebToken(userDb.id); //generando jason web token
 
     response.status(201).json({
       //se devuelve un esstado positivo sobre la modificacion del usuario del usuario
@@ -70,14 +70,13 @@ const loginUserGoogle = async (request, response = response) => {
         password: "ddfgfgfggg",
         googleToken: true,
       });
-    }else{
-      user=userDb;
-      user.google=true 
+    } else {
+      user = userDb;
+      user.google = true;
     }
     await user.save();
 
-    const token = await getJsonWebToken(user.id);//generando jason web token 
-
+    const token = await getJsonWebToken(user.id); //generando jason web token
 
     response.status(201).json({
       //se devuelve un esstado positivo sobre la modificacion del usuario del usuario
@@ -86,7 +85,7 @@ const loginUserGoogle = async (request, response = response) => {
       name,
       email,
       picture,
-      token
+      token,
     }); //si la respuesta es positiva y el token suministrado es correcto , entonces se procederia
     //adar uun mensaje en donde se exlica el ok de la respuesta asi como el despliegue de todas las
     //constantes previamente desagregadas del token(email,name ,picture) propias por default de dicho
@@ -99,4 +98,17 @@ const loginUserGoogle = async (request, response = response) => {
     });
   }
 };
-module.exports = { loginUser, loginUserGoogle };
+const loginUserTokenRenew = async (request, response = response) => {
+  const userId = request.userId;
+
+  const renewToken = await getJsonWebToken(userId); //generando jason web token
+
+  response.status(201).json({
+    //se devuelve un esstado positivo sobre la modificacion del usuario del usuario
+    ok: true,
+    msg: "token Generated",
+    renewToken,
+  });
+};//basicamente en este ultimo metodo simplemente se regresaria un nuevo token , cuando 
+//el actual se encuentre a punto de vencer
+module.exports = { loginUser, loginUserGoogle, loginUserTokenRenew };

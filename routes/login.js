@@ -15,9 +15,10 @@
 
 const { Router } = require("express");
 const router = Router();
-const { loginUser ,loginUserGoogle} = require("../controllers/login");
+const { loginUser ,loginUserGoogle,loginUserTokenRenew} = require("../controllers/login");
 const { check } = require("express-validator");
 const { fieldValidator } = require("../middleware/validationFields");
+const { validateJwt } = require("../middleware/jwtMiddleware");
 
 //muy util para validar campos y demas en el back
 
@@ -40,6 +41,11 @@ router.post(
   ],
   loginUserGoogle
 );//ruta especoificada para el usuario que desee autentificarse mediante google
+
+router.get(
+  "/renew",validateJwt,
+  loginUserTokenRenew
+);//renovando el token del usuario autentificado
 //=======================================================================
 //inicializando variables express
 //========================================================================

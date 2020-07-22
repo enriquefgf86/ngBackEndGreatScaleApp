@@ -9,9 +9,9 @@ const cryptoPaswword = require("bcryptjs"); //importando el encriptador de contr
 const { getJsonWebToken } = require("../helpers/jasonWebToken");
 
 const getAllHospitals = async (request, response = response, next) => {
-  const allHospitals = await Hospital.find().populate("user","name img email");//en este caso vease que simplemente 
-  //sea accede a la colleccion completa de hospitales ademas , ser un poco mas especifcio y mediante la 
-  //fucnion de mongoose populate , se especifica que de dicha collecion traida de los hospitales es necesario 
+  const allHospitals = await Hospital.find().populate("user", "name img email"); //en este caso vease que simplemente
+  //sea accede a la colleccion completa de hospitales ademas , ser un poco mas especifcio y mediante la
+  //fucnion de mongoose populate , se especifica que de dicha collecion traida de los hospitales es necesario
   //que se extraiga para cada uno  del apartado de user(traido en cada hospital) su nombre, email e imagen
 
   response.status(201).json({
@@ -25,7 +25,7 @@ const getAllHospitals = async (request, response = response, next) => {
 //Creando el hospital
 //=====================================================================================
 const createAHospital = async (request, response, next) => {
-  const userId =  request.userId; //vease que se extrae del token el user Id devengado en el jwt necesario para relaizar cualquier
+  const userId = request.userId; //vease que se extrae del token el user Id devengado en el jwt necesario para relaizar cualquier
   //accion de crearHospitales(a traves del usuario con token simepre)
   const hospital = new Hospital({ user: request.userId, ...request.body }); //en este proceso vease que se desestructura
   //todo lo referente al modelo de Hospital que se trae en el requeswt body, (...request.body), y una vez hecho
@@ -44,7 +44,7 @@ const createAHospital = async (request, response, next) => {
       ok: true,
       msg: "Hospital created",
       hospital: hospitalDb,
-      user:userId
+      user: userId,
     });
   } catch (error) {
     //de lo contrario entonces en este catch se devolveria unu error
@@ -60,55 +60,45 @@ const createAHospital = async (request, response, next) => {
 //=====================================================================================
 
 const updateHospital = async (request, response = response) => {
-  //   const userId = request.params.id; //designando el id traido por el usuario en el request de sus parametros oel URL
-
+  const hospitalId = request.params.id; //designando el id traido por el hospital en el request de sus parametros d
+  //previamente denotado en el archivo de routas para el hospital(/:id)el URL
+  const userId = request.userId;
+  const hospitalDb = Hospital.findById(hospitalId); //buscando la exiyencia del hospital traido en el
+  //parametro
   try {
-    //proceso de logica
+    if (!hospitalDb) {
+      return response.status(401).json({
+        //se devuelve un esstado negativo sobre la modificacion del hospital
+        ok: false,
+        msg: "Hospital Doesnt exist",
+      });
+    }
+    const hospitalModifcation = { ...request.body, user: userId }; //basicamente  se crea una constante
+    //la cual desagrega todo el body traido en el request perteneciente al endpoint de modificar hospital
+    //y con ella tambien se le asigna a uno de los items de ese body desagregado (user), el id del
+    //usuario que acomete la modificacion , previamente traido en el requet despues de haber pasado
+    //la validacion del token
 
-    // const userDb = await User.findById(userId); //asiganado a la variable userDb el oid traido por el usuario en el params
-
-    // if (!userDb) {
-    //   //validacion para saber si el id del usuario solicitado existe
-    //   return response.status(400).json({
-    //     ok: false,
-    //     msg: "user doesn't exist",
-    //   });
-    // }
-
-    // const { password, google, email, ...userDbFields } = request.body; //trayendo todo lo que el usuario y sus items representa en el body del request
-
-    // if (userDb.email !== email) {
-    //   //para evitar la modificacion de un correo a un correo ya existente o no actualizado
-    //   //lo cual duplicaria los keys de ahi su elimnacion del cuerpo modificado asigando a
-
-    //   const emailExisting = await User.findOne({ email }); //inicializando variable que trae el email existente en
-    //   //el esque,a del usuario, para posteriores validaciones
-
-    //   if (emailExisting) {
-    //     return response.status(400).json({
-    //       ok: false,
-    //       msg: "cant Update to this email cause already exists",
-    //     });
-    //   }
-    // }
-
-    // userDbFields.email = await email;
-
-    // // delete userDbFields.password;//borrando de los campos de actualizacion asignados a la variable userDbFields los
-    // // delete userDbFields.google;//iems password y google , pues los mismos no se necesitan actualizar en este ejercicio
-
-    // const userDbFieldsUpdated = await User.findByIdAndUpdate(
-    //   userId,
-    //   userDbFields,
-    //   { new: true }
-    // );
+    const updatedHospital = await Hospital.findByIdAndUpdate(
+      hospitalId,
+      hospitalModifcation,
+      { new: true }
+    );
+    //Esta manera manera de modificacion es un poco mas sencilla y abarcadora pues pposterior al paso
+    //anterior en donde se desagrega  el body request , y se le asigana uno de sus items(user) el
+    //id traido y validado por el token (userId), simplemente ya se acederia entocens al constructor de
+    //hospital para modifcar y a traves de la funcion findByIdAndUpdate, como bien se dice
+    //primero se pasaria el id del hospital en cuestion traido median el request params(hospitalId), luego
+    //se pasarian los paremtros del update, los cuales se realizaron en el paso anterior , y por ultimo
+    //entonces se inicializaria el template new:true lo cual regresaria el ultimo documento actulaizaod
 
     await response.status(201).json({
       //se devuelve un esstado positivo sobre la modificacion del usuario del usuario
       ok: true,
       msg: "Hospital Updated",
+      hospital: updatedHospital,
       //   userDbFieldsUpdated,
-    });
+    }); //trayendo entonces la respuesta positiva ya con el hospital actualizado
   } catch (error) {
     console.log(error);
     response.status(500).json({
@@ -123,19 +113,25 @@ const updateHospital = async (request, response = response) => {
 //=====================================================================================
 
 const deleteHospital = async (request, response = response) => {
-  //   const userId = request.params.id;
+  const userId = request.params.userId;
+  const hospitalId = request.params.id; //designando el id traido por el hospital en el request de sus parametros d
 
   try {
-    // const userDb = await User.findById(userId);
+    const hospital = await Hospital.findById(hospitalId); //se busca dentro del cpntructor de Hospital
+    //la existenxia o no de un item con el id traido en el parametro
 
-    // if (!userDb) {
-    //   // validacion para saber si el id del usuario solicitado existe
-    //   return await response.status(404).json({
-    //     ok: false,
-    //     msg: "user doesn't exist",
-    //   });
-    // }
-    // await User.findByIdAndDelete(userId);
+    if (!hospital) {
+      return response.status(401).json({
+        ok: false,
+        msg: "Hospital has been deleted",
+      }); //se devuelve un esstado negativo sobre la modificacion del usuario del usuario
+    }
+
+    await Hospital.findByIdAndDelete(hospitalId);//ordenando la accion de eliminar
+    //el hospitalsegun el id traido en el request params y filtrado por las difrentes callbacks
+    //lo cual nos indica que si llego hasta aqui es porque existe , de ahi entonces que se pueda 
+    //proceder a acceder al constructor de hospital y mediante el al metodo findByIdAndDelete
+    //pasandole como paramtro dicho hospitalId
 
     response.status(201).json({
       //se devuelve un esstado positivo sobre la modificacion del usuario del usuario
