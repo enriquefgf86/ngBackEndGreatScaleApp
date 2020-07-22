@@ -8,12 +8,15 @@ var mongoose = require("mongoose");
 const connection = async () => {
   try {
     await mongoose.connection.openUri(
-    //   "mongodb+srv://Kikito3786:Kikito3786@cluster0.mfntc.mongodb.net/ngGreatScalesapp",//concexion de mongoose a la 
-                                                                                           //base de datos
-    
-    process.env.DB_connection_chain,//opcional se pude hacer referencia a la variable de entorno DB_connection_chain
-                                       // en donde tambien se declaro dicha cadena de conexion a la base de datos 
-                                       //de ahi que se establezca dicho link a la variable de entorno   
+      process.env.DB_connection_chain,
+      //opcional se pude hacer referencia a la variable de entorno DB_connection_chain
+      // en donde tambien se declaro dicha cadena de conexion a la base de datos
+      //de ahi que se establezca dicho link a la variable de entorno
+
+      // "mongodb+srv://Kikito3786:Kikito3786@cluster0.mfntc.mongodb.net/ngGreatScalesapp",
+      //concexion de mongoose a la
+      //base de datos
+
       {
         useNewUrlParser: true,
         useUnifiedTopology: true,
@@ -28,10 +31,9 @@ const connection = async () => {
   }
 };
 //===============================================================================================================
-//Exportando este archivo de conexion a la base de detaos de mongoose en especifico exportandose la variable connection 
+//Exportando este archivo de conexion a la base de detaos de mongoose en especifico exportandose la variable connection
 //a la cual le es asigando todo el path de conexion en si
 //=================================================================================================================
-module.exports={
-    connection 
-}
-
+module.exports = {
+  connection,
+};

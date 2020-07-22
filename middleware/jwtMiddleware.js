@@ -15,7 +15,8 @@ const validateJwt = (request, response, next) => {
   }
   try {
       const {userId}=jwt.verify(token,process.env.TOKEN_SECRET_WORD);
-      console.log(userId);
+      // console.log(userId);
+      request.userId=userId
 
   } catch (error) {
     return response.status(400).json({

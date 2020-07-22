@@ -1,28 +1,35 @@
-//creandose la importacion de librerias para que funcionen ciertas dependencias ,
-//se le llamara Requires
+// esta es la carpeta ruta del proyecto back end y a traves de ella se accede a las demas dependencias del proyecto
+// por no nombre a este repositorio se le llama app, y en lella se inicializan varios paquetes 
+//  que serian de uso del resto de la applicacion
+
 // ==============================================================================
+//Siempre en cada dependencia de la aplicacion de express es necesario primero 
+//importar todos los requires que dicha dependencia necesitaria para su funcionamiento
+//o sea imports
 // Requires
 // ===============================================================================
-
 const express = require("express"); //siempre express sera necesario de ahi que se importe como primero
 
 require("dotenv").config(); //determinando el uso de la variables de entorno en este caso accediendose a traves del pa
-//quete de node al paquete dotenv encargado de manejo de variables de entorn
+//quete de node al paquete dotenv encargado de manejo de variables de entorn0
 
 const cors = require("cors");//Instalando cors, lo cual seria una libreria de node necesaria para permitir 
-//acceso a nuestra api
+//acceso a nuestra api desde cualquier sitio
 
 const { connection } = require("./database/config"); //importando la variable de conexion inicializada en config.js
 //la cual utiliza mongoose para aceder a la base de datos de mongo atlas.
 //Vease que se inicializa la variable a manera de llaves pues se
 //desagrega en caso de querer adicionar a dicha constante mas
 //elementos en un futuro
-var bodyParser = require("body-parser");
+var bodyParser = require("body-parser");//inicializando la variable body parser necearia para la descifre de codigos json 
+//y demas 
 
 //=======================================================================
+// Una vez importados los requeirmientos se hace necesario inicializar las variables que de una forma u otra 
+// serian las encargadas de triggerizar la accion .
 //inicializando variables
 //========================================================================
-const app = express(); //inicializando aplicacion de express
+const app = express(); //inicializando aplicacion de express la mas importante y necesaria para el arrancado de la dependencia
 
 //=======================================================================
 //conectando a la base de datos con ayuda de mongoose
@@ -48,7 +55,8 @@ app.use(express.json());
 app.use(cors());
 
 //============================================================================
-//Rutas de app raiz
+//Rutas de app raiz:aqui se establece la ruta del app raiz('/') de ella entonces
+//se originarian la demas 
 //============================================================================
 app.get("/", (request, response, next) => {
   response.status(200).json({
@@ -57,43 +65,31 @@ app.get("/", (request, response, next) => {
   });
 });
 
-// ==================================================================
-// importando la ruta creada asignadosele a una variable
-// ==================================================================
-var loginRoutes = require("./routes/login");
-var appRoutes = require("./routes/app");
-var userRoutes = require("./routes/user");
-var hospitalRoutes = require("./routes/hospital");
-var doctorRoutes = require("./routes/doctor");
-var generalSearchRoutes = require("./routes/generalSearch");
-var uploadRoutes = require("./routes/uploads");
-var downloadRoutes = require("./routes/downloads");
-
 //=========================================================================
 //estableciendo las rutas importadas desde los modulos
+//user,login.hospitals,doctors.....todas estas rutas son creadas 
+//en la carpeta de routes  e importadas a manera de middleware mediante
+//funcion use canalizandolas a traves de esta la dependencia principal
+//app
 //========================================================================
 app.use("/user",require('./routes/user') );
 app.use("/login",require('./routes/login'));
+app.use("/hospital",require('./routes/hospital'));
+app.use("/doctor",require('./routes/doctor'));
+app.use("/allSearch",require('./routes/generalSearch'))
+app.use("/upload",require('./routes/uploads'))
 
-// app.use("/login", loginRoutes);
 
-// app.use("/hospital", hospitalRoutes);
 
-// app.use("/doctor", doctorRoutes);
 
-// app.use("/search", generalSearchRoutes);
-
-// app.use("/uploads", uploadRoutes);
-
-// app.use("/download", downloadRoutes);
-
-app.use("/", appRoutes), //vease que en este caso se hace referencia a la importada desde el modulo routes
-  //haciendo referencia en este casoa la variable a la cual  le fue asifnada
-  //appRooutes, especificandose que la misma se triggerizaria si la ruta
-  //seleccionada por el usuario es ('/')
 
   //=======================================================================
-  //escuchando peticiones, o levantando el servidor de node
+  //escuchando peticiones, o levantando el servidor de node, mediante este apartado em
+  //la raiz del proyecto...vease que en el mismo se establece , el numero de
+  //al cual el server se conecta(3000), y como segundo argumento se pasa un callback
+  //en donde como referencia para el usuario de saber si se conecto o no 
+   //despliega un string , especificandose el color en qure debe 
+   //salir la palabra online [\x1b[32m%s\x1b[0m"](verde)
   //========================================================================
   app.listen(3000, () => {
     console.log(
