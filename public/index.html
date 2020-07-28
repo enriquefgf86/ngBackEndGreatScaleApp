@@ -1,37 +1,47 @@
+<!-- carpeta public a la cual cualquier usuario puede aceder para el loggeo mediante google desarrolla
+un arcivo html basico para dicho proceso que autoleggeala usuario , no obstante , la generacion 
+de tokens y demas se relaiza desde nuestor servidor -->
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="google-signin-client_id" content="980795418978-5bpklk8rngjkuvqtgdld8qbq4sv907jq.apps.googleusercontent.com">
-    <title>Sign in </title>
-</head>
-<body>
-    <h1>Google SignIn</h1>
-    <div class="g-signin2" data-onsuccess="onSignIn"></div>
 
-    
-    <script src="https://apis.google.com/js/platform.js" async defer></script>
-    <a href="#" onclick="signOut()">Sign out</a>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- //Este item especificop sale una vez obtenido el api key del google console -->
+  <meta name="google-signin-client_id"
+    content="980795418978-5bpklk8rngjkuvqtgdld8qbq4sv907jq.apps.googleusercontent.com">
+  <title>Sign in </title>
+</head>
+
+<body>
+  <h1>Google SignIn</h1>
+  <div class="g-signin2" data-onsuccess="onSignIn"></div>
+
+
+  <script src="https://apis.google.com/js/platform.js" async defer></script>
+  <a href="#" onclick="signOut()">Sign out</a>
 </body>
 <script>
-    function onSignIn(googleUser) {
-  var profile = googleUser.getBasicProfile();
-  console.log('ID: ' + profile.getId()); // Do not send to your backend! Use an ID token instead.
-  console.log('Name: ' + profile.getName());
-  console.log('Image URL: ' + profile.getImageUrl());
-  console.log('Email: ' + profile.getEmail()); // This is null if the 'email' scope is not present.
+  function onSignIn(googleUser) {
+    var profile = googleUser.getBasicProfile();
+    console.log('ID: ' + profile.getId()); // Do not send to your backend! Use an ID token instead.
+    console.log('Name: ' + profile.getName());
+    console.log('Image URL: ' + profile.getImageUrl());
+    console.log('Email: ' + profile.getEmail()); // This is null if the 'email' scope is not present.
 
-  var id_token = googleUser.getAuthResponse().id_token;
-  console.log(id_token);
-  
-}
+    var id_token = googleUser.getAuthResponse().id_token;
+    console.log(id_token);
 
-function signOut() {
+  }
+
+  function signOut() {
     var auth2 = gapi.auth2.getAuthInstance();
     auth2.signOut().then(function () {
       console.log('User signed out.');
     });
   }
 </script>
+
 </html>
+<!-- Todo est proceso es propio de google sobre el proceso de logeado mediante google sign in 
+//referise a la documentacion  -->

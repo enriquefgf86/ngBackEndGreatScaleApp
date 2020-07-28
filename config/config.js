@@ -1,1 +1,0 @@
-module.exports.SEED='this-is-my-seed'

@@ -14,15 +14,6 @@ var express = require("express");
 //inicializando variables express
 //========================================================================
 var app = express();
-// ===========================================================================
-// Estableciendo la ruta principal
-// ===========================================================================
-// app.get("/", (request, response, next) => {
-//   response.status(200).json({
-//     ok: true,
-//     message: "request correct",
-//   });
-// });
 // ===================================================================================
 // Exportando la ruta o modulo para su uso en la aplicacion
 // ==================================================================================
