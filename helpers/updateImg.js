@@ -40,7 +40,7 @@ const updateImage = async (typeFile, idFile, archiveStoredName) => {
     //premisa se evaluan ciertas condiciones dentro de la coleleccion y demas 
     case "doctors":
       const doctor = await Doctor.findById(idFile);
-      const oldImgPath = `../uploadFiles/doctors/${doctor.img}`;
+      const oldImgPath = `./uploadFiles/doctors/${doctor.img}`;
       //vease uq epara el caso de estar en la colleccion de doctors(traido en el request en el controller)
       //lo primero que se hace es inicializar una variable llamada doctor , la cual mapearia el esquema
       //Doctor previamente importado, y a traves de ella se solicitaria encontrar un id especifico
@@ -69,7 +69,7 @@ const updateImage = async (typeFile, idFile, archiveStoredName) => {
 
     case "users":
       const user = await User.findById(idFile);
-      const oldImgPathUser = `../uploadFiles/users/${user.img}`;
+      const oldImgPathUser = `./uploadFiles/users/${user.img}`;
       //vease uq epara el caso de estar en la colleccion de doctors(traido en el request en el controller)
       //lo primero que se hace es inicializar una variable llamada user , la cual mapearia el esquema
       //User previamente importado, y a traves de ella se solicitaria encontrar un id especifico
@@ -95,7 +95,7 @@ const updateImage = async (typeFile, idFile, archiveStoredName) => {
 
     case "hospitals"://mismo proceso que los dos anteriores pero en este caso para hospitals
       const hospital = await Hospital.findById(idFile);
-      const oldImgPathHospital = `../uploadFiles/hospitals/${hospital.img}`;
+      const oldImgPathHospital = `./uploadFiles/hospitals/${hospital.img}`;
 
       if (!hospital) {
         console.log("cant find hospital by that id");

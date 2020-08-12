@@ -122,7 +122,7 @@ const uploadFile = async (request, response = response, next) => {
       });
     }
 
-    updateImage(typeFile, idFile, archivePath, archiveStoredName);
+    updateImage(typeFile, idFile, archiveStoredName);
 
     response.status(201).json({
       ok: true,

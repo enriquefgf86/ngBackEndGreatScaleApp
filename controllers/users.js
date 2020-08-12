@@ -221,9 +221,21 @@ const updateUser = async (request, response = response) => {
     } //en este caso de que el usuario pretenda modificar a un email que de hecho ya existe en la base de datos
     //entonces se retornaria un error del proceso y por ende la finalizacion del ciclo en este proceso
 
-    userDbFields.email = await email; //de nos ser asi le inicializa un avarible llamada
+    if (!userDbFields.google == true) {
+      userDbFields.email = await email;
+    } else if (userDbFields.google && userDbFields.email != (await email)) {
+      return await response.status(400).json({
+        ok: false,
+        msg: "Google Users Can't Change Their Emails",
+      });
+    }
+    //de nos ser asi le inicializa un avarible llamada
     //userDbFields, y a la misma se le apendiza un item llamdo email , al cual se le asigan el valor
-    //traido por el email del request body
+    //traido por el email del request body.no obstante vease que este proceso pasa por otra validacion consta
+    //andose a ver si el usuario provieine de google !userDbFields.google, pues en caso de que fuese asi
+    //no se podria modificar dicho email pues es externo, en caso de que por situacion extrema se cambie
+    //entonces se entraria en un segundo ciclo con un else if que al constatar que dicho email no coincide
+    //con el email guardado en la base de datos erogaria un mensaje de response 400
 
     const userDbFieldsUpdated = await User.findByIdAndUpdate(
       userId,

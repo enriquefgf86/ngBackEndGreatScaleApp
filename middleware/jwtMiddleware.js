@@ -22,8 +22,8 @@ const validateJwt = (request, response, next) => {
   //request de la aplicacion, especificamente en el header de la misma , y por nombre o key
   //siempre debera usar el valor "user-token"(Esto es muy importante pues en el Postman o cualquier
   //otro tester de endpoiints es estrictamente necesario ponerlo de esa forma , en el header)
-  console.log(token);
 
+  console.log(request.header("user-token"), "header detail");
   if (!token) {
     return response.status(400).json({
       ok: false,
@@ -42,7 +42,11 @@ const validateJwt = (request, response, next) => {
     const { userId } = jwt.verify(token, process.env.TOKEN_SECRET_WORD);
 
     request.userId = userId;
-  } 
+    console.log(request.userId);
+
+    next(); //de no entrarse en el catch y la funcion seguir su curso normal entonces el middleware seria
+    //efectivo y por consiguiente daria paso al proximo eslabon de la cadena mediante el metodo next()
+  } catch (error) {
     //vease que primero se estable una constante llamada userId la cual no seria mas que el
     // resultado del proceso de verificacion de validez del token enviado a traves de
     //la libreria jsonwebtoken asignado previamente a la variable jwt, accediendose a traves
@@ -56,19 +60,15 @@ const validateJwt = (request, response, next) => {
     //un paso de extra confirmacion de la autenticidad del usuario y por ende acortaria un paso
     //pues ya en esta asigancion se treria el token y demas informacion para futuros
     //paso a acometer en la aplicacion
-    
-    catch (error) {
+
     return response.status(400).json({
       ok: false,
       error,
-      msg: "no token in the request",
+      msg: "no valid token ",
     });
   } //De no concretarse el primer paso de validacion y por consiguiente canalizacion
   //del token entonces se incureriria en un error que seria recogido en este apartado (cacth)
   //con su respectivo response y error code
-
-  next();//de no entrarse en el catch y la funcion seguir su curso normal entonces el middleware seria
-  //efectivo y por consiguiente daria paso al proximo eslabon de la cadena mediante el metodo next()
 };
-module.exports = { validateJwt };//exportandose la fucncion asignada a la variable validateJwt, para 
+module.exports = { validateJwt }; //exportandose la fucncion asignada a la variable validateJwt, para
 //su futuro uso en las demas dependencias de la aplicacion.

@@ -69,7 +69,7 @@ router.put("/:type/:id", validateJwt, uploadFile);
 //Proceso de endopoint que demarca la logica para descargar imagenes de la colleccion 
 //y su lugar especifoc dentro de ellas
 //==================================================================================
-router.get("/:type/:imagePath", validateJwt, downloadFile); 
+router.get("/:type/:imagePath", downloadFile); 
 //Al ser este un metodo de descarga u obtnecion se hace necesario utilizar el metodo get 
 //haciendose alusion a la ruta madre ('/')apendizandosele
 //los diferentes paramtros necesarios para su correcxta ejecucion segun los requerimientos del endpoint

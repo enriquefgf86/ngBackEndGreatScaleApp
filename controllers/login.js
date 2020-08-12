@@ -83,9 +83,9 @@ const loginUser = async (request, response = response) => {
     //proceso seria el email
 
     if (!userDb) {
-      return response.status(400).json({
+      return response.status(404).json({
         ok: false,
-        msg: "Email  not valid",
+        msg: "User not Found",
       });
     } //Estableciendose una condsicional que determina si el email por el cual se hace el query sobre la collecion
     //de User , existe(se ha registrado anteriormnete), de no ser asi se supone el usuario no se ha registradi
@@ -109,7 +109,7 @@ const loginUser = async (request, response = response) => {
       //checking if password is fine
       return response.status(400).json({
         ok: false,
-        msg: " password  not valid",
+        msg: " Password  not valid",
       });
     } //de no ser exitoso el proceso de comparacion alojado en la variable validPassword, se procederia
     //a arrojar una respuesta negativa y el ciclo terminaria aqui
@@ -255,11 +255,14 @@ const loginUserTokenRenew = async (request, response = response) => {
   //en los middelware vendria el parametro de next, lo cual daria continuidad a cualesquiera otro
   //proceso una vez terminado el proceso actual de manera satisfactoria
 
-  const userId = request.userId; //Vease que a continuacion se crea una contante
+  const userId =  request.userId; //Vease que a continuacion se crea una contante
   // encargada de recopilar todla la informacion traida en le request
   //especificamente en el apartado userId, asigandosele dicha data a una constante de igual nombre
   // en donde dicho requeste especificamente el parametro userid que vendria asigando de antemano
   //con un token valido , previamente calculado en  el middleware jwtMiddleware calculado en dicho modulo.
+
+
+  
 
   const renewToken = await getJsonWebToken(userId); //en este paso de seguir el proceso , entonces se procederia
   //a generar el token, mediante la importacion de la variable getJsonWebToken proveniente del modulo helpers
@@ -268,10 +271,17 @@ const loginUserTokenRenew = async (request, response = response) => {
   //la que se pasa como parametro, lo cual entonces devengaria dicho token con lz infor
   //macion del id uncamente.Este proceso se le asigna a una variable constante llamada renewToken
 
-  response.status(201).json({
+  const userRenewed =await  User.findById(userId); //Vease que a continuacion se crea una contante
+  // encargada de recopilar todla la informacion traida en le request.body
+  //especificamente en el apartado email desagregado, asigandosele dicha data a una constante de igual nombre
+  // en donde dicho requeste especificamente el parametro email que vendria asigando de antemano
+  //eneml body.
+
+ await  response.status(201).json({
     ok: true,
     msg: "token Generated",
     renewToken,
+    userRenewed
   });
 }; //basicamente en este ultimo metodo simplemente se regresaria un nuevo token , cuando
 //el actual se encuentre a punto de vencer
