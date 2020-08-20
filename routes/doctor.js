@@ -21,6 +21,7 @@ const {
   createADoctor,
   updateDoctor,
   deleteDoctor,
+  getDoctorById,
 } = require("../controllers/doctors"); //importando del controlador de usuarios todo lo referente a la ruta
 //o cada una de lloas rutas del controller para doctor
 
@@ -90,7 +91,7 @@ router.post(
   "/",
   validateJwt,
   [
-    check("name", "name is obligatory").not().isEmpty(),//determinando que el aprtdo de name no 
+    check("name", "name is obligatory").not().isEmpty(), //determinando que el aprtdo de name no
     //vacio
     check("hospital", "hospital id must be valid").isMongoId(), //validando el id sum,inistrado por mongo como valido
 
@@ -152,6 +153,12 @@ router.delete("/:idDoctor", validateJwt, deleteDoctor);
 //especifica en la ruta , el parametro que traeria el id del doctor seleccionado para su eliminacion
 //:idDoctor, por ultimo se hace referencia al controller que ejeucta la accion y ya esta
 
+router.get("/:idDoctor", validateJwt, getDoctorById);
+//Este ultimo proceso es muy parecido a los dos anteriores , aunque en este caso , al tratartse
+//de eliminar un registor no se necesita middleware de check alguno , simplemente se verifica que
+//elk usario que intenta elminar algo esta autorizado mediante token valido validateJwt, admeas de que se
+//especifica en la ruta , el parametro que traeria el id del doctor seleccionado para su eliminacion
+//:idDoctor, por ultimo se hace referencia al controller que ejeucta la accion y ya esta
 //=========================================================================================
 //Exportando el router de este endpoint
 //=========================================================================================

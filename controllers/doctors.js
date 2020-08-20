@@ -18,6 +18,7 @@ var Doctor = require("../models/doctors");
 //los algoritmos
 //=================================================================================================
 const { response } = require("express"); //importando response de express que basicamente seria una ayuda para saber
+const { IdTokenClient } = require("google-auth-library");
 //posibles anotaciones necesarias que por ayuda dicho plugin trigerizan
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -65,6 +66,42 @@ const getAllDoctors = async (request, response = response, next) => {
   //satus 2200(ok) con un mesaje que indica que todos los doctores fueron obtenidos con su respectiva
   //informacion , pasandose como data entoces el resultado del query anterior almacenado en la variable
   //inicializada con el nombre de allDoctors
+};
+// =========================================================================================
+// Obtener un medico en especifico por Id
+// =========================================================================================
+const getDoctorById = async (request, response = response) => {
+  const doctorId = request.params.idDoctor; //trayendo enntoces el id del doctor a modificar en cuestion
+  //pasod mediante el requet param de la ruta del servicio que sugiere dicha actualizacion(/:idDoctor)
+
+  const userId = request.userId; //designando el id traido por el usuario en el request
+  //de sus parametros oel URL proveido por el token
+
+  try {
+    const doctor = await Doctor.findById(doctorId)
+      .populate("user", "name img id")
+      .populate("hospital", "name id img");
+
+    if (!doctor) {
+      return response.status(404).json({
+        ok: false,
+        msg: "Doctor Not Found",
+      });
+    }
+
+    await response.status(201).json({
+      ok: true,
+      msg: "Doctor Found",
+      doctor,
+    });
+  } catch (error) {
+    console.log(error);
+    response.status(500).json({
+      ok: false,
+      msg: "Unexpected error .Check logs",
+    }); //de no cumplirse el ciclo en el try entoces se procederia a entrar en el ciclo del
+    //catch con su respectivo respnse de error  y su mensjae explicatico
+  }
 };
 
 //========================================================================================
@@ -257,7 +294,7 @@ const deleteDoctor = async (request, response = response) => {
       ok: false,
       msg: "Unexpected error .Check logs",
     });
-  }//de lo contrario se caeria en el ciclo catch en donde se erogaria el error , con su respectivo mensaje
+  } //de lo contrario se caeria en el ciclo catch en donde se erogaria el error , con su respectivo mensaje
   //y demas
 };
 
@@ -266,4 +303,5 @@ module.exports = {
   createADoctor,
   updateDoctor,
   deleteDoctor,
-};//Exportandose todos los controladores de este esquema(Doctor), para su posetrior uso en las demas dependencias
+  getDoctorById,
+}; //Exportandose todos los controladores de este esquema(Doctor), para su posetrior uso en las demas dependencias
