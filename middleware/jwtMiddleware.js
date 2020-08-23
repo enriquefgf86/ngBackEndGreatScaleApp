@@ -11,6 +11,12 @@
 //======================================================================================
 const jwt = require("jsonwebtoken");
 
+//===========================================================================
+//importamdo el modelo de user para propositos de validacion segun role  en el
+//front end
+//==========================================================================
+const User = require("../models/user");
+
 //===========================================================================================
 //una vez importada dicha libreria entonces se procederia a lo que es el desarrollo del middleware
 //que se utilizaria por los difderentes modlulos de la aplicaciona, y todo este proceso se le asiganria
@@ -70,5 +76,111 @@ const validateJwt = (request, response, next) => {
   //del token entonces se incureriria en un error que seria recogido en este apartado (cacth)
   //con su respectivo response y error code
 };
-module.exports = { validateJwt }; //exportandose la fucncion asignada a la variable validateJwt, para
+//=====================================================================================
+//En este proceso se desarrolla el middleware que de cierta manera es el qie gestiona los
+//procesos segun el rol del usuario
+//==============================================================================
+const validAdminRole = async (request, response, next) => {
+  //vease que prinmeramentre se inicializa un avariable constante la cual seria exportada
+  //posteriormente con el nombre de validAdminRole
+
+  const userId = request.userId; //vease que se inicializa una variable de nombre userId
+  //a la cual se le asigna el user Id traido en el request una vez traido el token del usuario
+
+  //luego se procede a inicializarse el proceso de try catch, en donde en su primera parte se
+  //se procederia a ejecutar lo que se supone sea lo que la fucnion de bve arrojar como resultado y
+  //que de no ser asi seria arrojado entoinces a la segunda parte del proceso(catch), con el log
+  //de sus respectivos errores y demas
+  try {
+    const userDb = await User.findById(userId); //antes de entrar en la logica se procede a determinar
+    //si existe algun id  que iguale al que al que se trae en el request (userId), dentro
+    //del esquema de tipo User inicializado en la base de datos
+
+    if (!userDb) {
+      return response.status(400).json({
+        ok: false,
+        msg: "No user existing",
+      });
+    } //de no existir dicho id entonces se procederia a retornar una respuesta negativa
+    //arrojando un status 400 como que no se encontro el objeto buscado
+
+    if (userDb.role !== "ADMIN_ROLE") {
+      return response.status(403).json({
+        ok: false,
+        msg: "Unauthorized user ",
+      });
+    } //en este apartado despues de haber pasado la primera condicion si en este caso
+    //existe dicho id entonces se procederia a verificar si en uno de sus items para
+    // ese esquema(role) es distinto del ADMIN_ROLE, pues de de ser asi no tendria
+    //privilegios de administrador , y por ende no podria a pesar de terer acceso,
+    //modificar o hacer funciones propias del administrador
+
+    next(); //de pasar esta dos restricciones el middleware haria su funcion y daria
+    //paso al siguiente nivel mediante el next()
+  } catch (error) {
+    console.log(error);
+    response.status(500).json({
+      ok: false,
+      msg: "Internal Error , talk to the manager",
+    });
+  } //de no cumplirse el ciclo en el try entoces se procederia a entrar en el ciclo del
+  //catch con su respectivo respnse de error  y su mensjae explicatico
+};
+//===================================================================================
+//middleware encargado de gestioanar los roles y su control de permisos  en cuanto a
+//un usuario poderse modificar el mismo independientremente de que tenga rol de adminis
+//trador o no
+//====================================================================================
+const validAdminRoleOrUser = async (request, response, next) => {
+  //vease que prinmeramentre se inicializa un avariable constante la cual seria exportada
+  //posteriormente con el nombre de validAdminRoleOrUser
+
+  const userId = request.userId; //vease que se inicializa una variable de nombre userId
+  //a la cual se le asigna el user Id traido en el request una vez traido el token del usuario
+
+  const selfUserId = request.params.id; //en este apartado se inicializa una variable la cual
+  //se le asignaria el valor traido por el url correspondiente al endpoint en cuastion
+  //para el cual el middleware se evalua(id)
+
+  //luego se procede a inicializarse el proceso de try catch, en donde en su primera parte se
+  //se procederia a ejecutar lo que se supone sea lo que la fucnion de bve arrojar como resultado y
+  //que de no ser asi seria arrojado entoinces a la segunda parte del proceso(catch), con el log
+  //de sus respectivos errores y demas
+  try {
+    const userDb = await User.findById(userId); //antes de entrar en la logica se procede a determinar
+    //si existe algun id  que iguale al que al que se trae en el request (userId), dentro
+    //del esquema de tipo User inicializado en la base de datos
+
+    if (!userDb) {
+      return response.status(400).json({
+        ok: false,
+        msg: "No user existing",
+      });
+    } //de no existir dicho id entonces se procederia a retornar una respuesta negativa
+    //arrojando un status 400 como que no se encontro el objeto buscado
+
+    if (
+      (userDb.role !== "ADMIN_ROLE" && userId == selfUserId) ||
+      userDb.role == "ADMIN_ROLE"
+    ) {
+      next();
+    } //en este caso especifico lo que se pretende es que se permita a un usuario sin rol
+    //de administrador pero loggeado en suseccion , poder realizar cambios modificativos a
+    //su perfil o cualquier otra cosa que quisiese hacer , o de lo contrario de tener
+    //rol de administrador tambien se procederia
+    else {
+      return response.status(403).json({
+        ok: false,
+        msg: "Unauthorized user ",
+      });
+    } //de lo contrario se regresaria un status de no autorizacion
+  } catch (error) {
+    console.log(error);
+    response.status(500).json({
+      ok: false,
+      msg: "Internal Error , talk to the manager",
+    });
+  }
+};
+module.exports = { validateJwt, validAdminRole, validAdminRoleOrUser }; //exportandose la fucncion asignada a la variable validateJwt, para
 //su futuro uso en las demas dependencias de la aplicacion.

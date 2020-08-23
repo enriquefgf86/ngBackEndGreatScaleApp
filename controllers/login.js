@@ -44,6 +44,12 @@ const { getJsonWebToken } = require("../helpers/jasonWebToken");
 //======================================================================================================
 const { googleVerifyToken } = require("../helpers/googleverifying"); //importando el helper necesario para
 //la confirmacion de token emitido por google
+//========================================================================================
+// A manera de verificsador de roleas para sabe que comppoentes del menu se pueden ver o no
+// se inicializa una constante desagregada llamada menuFrontEnd traida desde el helper menu-front-end
+// encargado de verificar que el usuario segun su rol reciba o ono elementos en el menu del
+// front-end
+const { menuFrontEnd } = require("../helpers/menu-front-end");
 
 ////////////////////////////////////////////////////////////////////////////////////////
 //////////////            INICIO DE LOS CONTROLADORES            ////////////////////////////
@@ -125,10 +131,14 @@ const loginUser = async (request, response = response) => {
       ok: true,
       msg: "Ok logged",
       token,
+      menu: menuFrontEnd(userDb.role),
     });
     //para luego entonces proceder a dar un response positivo sobre dicho proceso
     //en donde a demas de mensaje de creacion y demas se procede tambien a exponer como data ewl token generado
-    //y asignado a la variable token
+    //y asignado a la variable token,ademas de otro item llamaado menu el cual aplicaria
+    //un tipo de menu prevuamente disenado en el helper traido desde los helpers llamado
+    //menuFrontEnd, al cual se le pasa como parametro el usuario traido de la base de datos y de el
+    //su role, el cual dependiendo del tipo de rol mostraria o no elementos de dicho menu
   } catch (error) {
     console.log(error);
     response.status(500).json({
@@ -226,10 +236,14 @@ const loginUserGoogle = async (request, response = response) => {
       email,
       picture,
       token,
+      menu: menuFrontEnd(user.role),
     }); //si la respuesta es positiva y el token suministrado es correcto , entonces se procederia
     //adar uun mensaje en donde se exlica el ok de la respuesta asi como el despliegue de todas las
     //constantes previamente desagregadas del token(email,name ,picture) propias por default de dicho
-    //token emitido por google
+    //token emitido por google,ademas de otro item llamaado menu el cual aplicaria
+    //un tipo de menu prevuamente disenado en el helper traido desde los helpers llamado
+    //menuFrontEnd, al cual se le pasa como parametro el usuario traido de la base de datos y de el
+    //su role, el cual dependiendo del tipo de rol mostraria o no elementos de dicho menu
   } catch (error) {
     return response.status(400).json({
       //se devuelve un esstado positivo sobre la modificacion del usuario del usuario
@@ -255,14 +269,11 @@ const loginUserTokenRenew = async (request, response = response) => {
   //en los middelware vendria el parametro de next, lo cual daria continuidad a cualesquiera otro
   //proceso una vez terminado el proceso actual de manera satisfactoria
 
-  const userId =  request.userId; //Vease que a continuacion se crea una contante
+  const userId = request.userId; //Vease que a continuacion se crea una contante
   // encargada de recopilar todla la informacion traida en le request
   //especificamente en el apartado userId, asigandosele dicha data a una constante de igual nombre
   // en donde dicho requeste especificamente el parametro userid que vendria asigando de antemano
   //con un token valido , previamente calculado en  el middleware jwtMiddleware calculado en dicho modulo.
-
-
-  
 
   const renewToken = await getJsonWebToken(userId); //en este paso de seguir el proceso , entonces se procederia
   //a generar el token, mediante la importacion de la variable getJsonWebToken proveniente del modulo helpers
@@ -271,20 +282,24 @@ const loginUserTokenRenew = async (request, response = response) => {
   //la que se pasa como parametro, lo cual entonces devengaria dicho token con lz infor
   //macion del id uncamente.Este proceso se le asigna a una variable constante llamada renewToken
 
-  const userRenewed =await  User.findById(userId); //Vease que a continuacion se crea una contante
+  const userRenewed = await User.findById(userId); //Vease que a continuacion se crea una contante
   // encargada de recopilar todla la informacion traida en le request.body
   //especificamente en el apartado email desagregado, asigandosele dicha data a una constante de igual nombre
   // en donde dicho requeste especificamente el parametro email que vendria asigando de antemano
   //eneml body.
 
- await  response.status(201).json({
+  await response.status(201).json({
     ok: true,
     msg: "token Generated",
     renewToken,
-    userRenewed
+    userRenewed,
+    menu: menuFrontEnd(userRenewed.role),
   });
 }; //basicamente en este ultimo metodo simplemente se regresaria un nuevo token , cuando
-//el actual se encuentre a punto de vencer
+//el actual se encuentre a punto de vencerademas de otro item llamaado menu el cual aplicaria
+//un tipo de menu prevuamente disenado en el helper traido desde los helpers llamado
+//menuFrontEnd, al cual se le pasa como parametro el usuario traido de la base de datos y de el
+//su role, el cual dependiendo del tipo de rol mostraria o no elementos de dicho menu
 
 module.exports = { loginUser, loginUserGoogle, loginUserTokenRenew };
 //Exportandose todos los controladores de este esquema(Doctor), para su posetrior uso en las demas dependencias

@@ -55,16 +55,23 @@ const router = Router(); //inicializando la constante Router previamente requeri
 //Tambien aunque no se usa se importa la variable esquematica de tipo User traida desde
 //los archivos de models correspondidente al aprtado de users
 //=======================================================================================
-var User= require("../models/user");
+var User = require("../models/user");
 
 //=========================================================================================
 //se importa el middelware validateJwt de la carpetas de middleware jwtMiddleware , lo cual
 //verificaria antes de acceder a culaquier endpoint y su respectiva fucnionalidad , si el token
 //que presenta el usuario en cuestion para accionar es valido o no , este middleware seria el
 //encargado de constatar y autorizar el siguiente paso en la operacion o no teniendo en
-//cuenta la validez del token
+//cuenta la validez del token, por otra parte tambien se importra el validador de role
+//el cual se encargaria de traer o verificar si el usuario que se analiza para cada uno de
+//los endpoints en su role presenta las caracteristicas necesarias para ciertos permisos
+//o no , usandose este middleware como extrsa verificante en cada uno de los endpoints
 //=======================================================================================
-const { validateJwt } = require("../middleware/jwtMiddleware");
+const {
+  validateJwt,
+  validAdminRole,
+  validAdminRoleOrUser,
+} = require("../middleware/jwtMiddleware");
 
 ///////////////////////////////////////////////////////////////////////////////////
 ////////////////        RUTAS O END-POINTS       //////////////////////////////////
@@ -98,7 +105,7 @@ router.post(
   ],
   createAUser
 ); //Crear un usuario
- //vease que primero se establece el tipo de metodo(post), y en el se pasa el route madre,
+//vease que primero se establece el tipo de metodo(post), y en el se pasa el route madre,
 //o sea el del app.js('/'), una vez llegado a ese punto se haria necesario constatar si
 //efeftivamente el usuario que hace la peticion tiene autorizacion alguna
 //para desarrollar dicho acometido, de ahi que para ello sea necesario utilizar el middelware
@@ -118,13 +125,13 @@ router.post(
 //entoces de no existor ningun problema y demas llamar por ultimo a la ejecucion del controlador
 //en este csaso especifico para la fucnio asignada a la variable de nombre  createAUser
 
-
 //==========================================================================
 // Estableciendo la ruta para modificar usuario
 // ===========================================================================
 router.put(
   "/:id",
   validateJwt,
+  validAdminRoleOrUser,
   [
     check("email", "email is obligatory").isEmail(),
     check("name", "name is obligatory").not().isEmpty(),
@@ -139,19 +146,22 @@ router.put(
 //mediante ,metodo put requeriria que se especifique a que arcivo es al que se le va a hacer dicha modificacion
 //de ahi que se le apendice a la misma el parametro(params) :id haciendo referencia al id del usuario
 //al cual se le hace la modificacion en si. Por lo demas se establecen los middleware necesarios
-//para especificar y indicar los campos a modificar asi como su validacion , y por ultimo se hace
-// referencia  al controller encargado de toda la logica opercional(updateUser)
-
+//para especificar y indicar los campos a modificar asi como su validacion , ademas de
+//establecerse el middleware que se ceciora para esta ruta si con el role que
+//el usuario tre es permisible hacer lo que este endpoint tiene  como funcion
+//en donde de no ser asi , ya en elmiddleware se inicializaron posibles respuesta sy demas
+//y por ultimo se hace  referencia  al controller encargado de toda la logica opercional(updateUser)
+//en este caso no se permitiria que un usuario sin rol de administrador o con un id similar
+//al usuario loggeado se haga algun cambio
 //==========================================================================
 // Estableciendo la ruta para borrar usuario
 // ===========================================================================
-router.delete("/:id", validateJwt, deleteUser);
+router.delete("/:id", [validateJwt, validAdminRole], deleteUser);
 //Este ultimo proceso es muy parecido a los dos anteriores , aunque en este caso , al tratartse
 //de eliminar un registor no se necesita middleware de check alguno , simplemente se verifica que
 //el usario que intenta elminar algo esta autorizado mediante token valido validateJwt, admeas de que se
 //especifica en la ruta , el parametro que traeria el id del suer seleccionado para su eliminacion
 //:id, por ultimo se hace referencia al controller que ejeucta la accion( deleteUser) y ya esta
-
 
 //=========================================================================================
 //Exportando el router de este endpoint

@@ -2,6 +2,7 @@
 //un token para posterior uso de ntro de la aplicacion en procesos de confirmacion , auten
 //tificacion , validaciones y demas
 
+
 //========================================================================================
 //Vease entonces que se hace necesario importar de la librearia externa jsonwebtoken su
 //paquete mediante require , y dicha dependencia entonces es asignada a la variable
@@ -66,5 +67,8 @@ const getJsonWebToken = (userId) => {
   //fucnion pasandosele como parametro el generatedToken y por ende la renew del token por el
   //tiempo estipulado y demas
 };
+
+
+
 module.exports = { getJsonWebToken }; //se exporta la fucnion  de este helper almacenada en la
 //variable  getJsonWebToken para su uso en las demas dependencias de la aplicacion!!!
