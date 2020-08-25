@@ -23,7 +23,10 @@ const { connection } = require("./database/config"); //importando la variable de
 //desagrega en caso de querer adicionar a dicha constante mas
 //elementos en un futuro
 var bodyParser = require("body-parser"); //inicializando la variable body parser necearia para la descifre de codigos json
+// const { path } = require("./routes/app");
 //y demas
+
+const path = require("path");
 
 //=======================================================================
 // Una vez importados los requeirmientos se hace necesario inicializar las variables que de una forma u otra
@@ -92,6 +95,16 @@ app.use("/hospital", require("./routes/hospital"));
 app.use("/doctor", require("./routes/doctor"));
 app.use("/allSearch", require("./routes/generalSearch"));
 app.use("/upload", require("./routes/uploads"));
+
+//====================================================================
+//comodin alternativo a una de estas rutas para que el servidor
+//sepa a donde redirigirse en caso de no existir ninguana de las rutas en el
+//search engine una vez la aplicacion sea desplegada en live
+//======================================================================
+app.get("*", (request, response) => {
+  response.sendFile(path.resolve(__dirname, "public/index.html"));
+}); //se redirecciona a traves del etodo propio de express al archivo index
+//previamente creado en el back end
 
 //=======================================================================
 //escuchando peticiones, o levantando el servidor de node, mediante este apartado em
