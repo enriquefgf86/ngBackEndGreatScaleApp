@@ -101,7 +101,10 @@ app.use("/upload", require("./routes/uploads"));
 //despliega un string , especificandose el color en qure debe
 //salir la palabra online [\x1b[32m%s\x1b[0m"](verde)
 //========================================================================
-app.listen(3000, () => {
+
+var port_number = process.env.PORT || 3000;
+
+app.listen(port_number, () => {
   console.log(
     "Express server running on port 3000:\x1b[32m%s\x1b[0m",
     "online"
